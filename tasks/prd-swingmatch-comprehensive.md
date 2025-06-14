@@ -47,8 +47,8 @@ SwingMatch is an innovative AI-powered mobile application designed to revolution
 ## 4. Functional Requirements
 
 ### 4.1 Video Recording & Session Management
-1. The system must allow users to record tennis sessions directly within the mobile app
-2. The system must provide AR guidance for optimal phone positioning during recording
+1. The system must allow users to record tennis sessions directly within the mobile app include simeple trimming
+2. The system must provide AR guidance for optimal phone positioning before recording
 3. The system must support high-quality video capture (1080p, 60fps minimum)
 4. The system must automatically detect and count individual strokes within a session
 5. The system must allow users to organize sessions with custom notes and tags
