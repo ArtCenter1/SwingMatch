@@ -75,6 +75,7 @@ SwingMatch is an innovative AI-powered mobile application designed to revolution
 14. The system must support in-app YouTube video replay for basic stroke lessons
 15. The system must provide local storage with automatic cloud synchronization
 16. The system must allow users to organize sessions with custom notes and tags
+14.1 The system must offer bookmarks for the YouTube video library to ensure easy access
 
 ### 4.3 AI Stroke Analysis Engine
 17. The system must analyze strokes using computer vision and pose estimation (MediaPipe)
@@ -245,7 +246,7 @@ SwingMatch is an innovative AI-powered mobile application designed to revolution
 
 ---
 
-**Document Version:** 2.0  
+**Document Version:** 1.1  
 **Last Updated:** [Current Date]  
 **Document Owner:** Product Team  
 **Stakeholders:** Engineering, Design, Marketing, Business Development
