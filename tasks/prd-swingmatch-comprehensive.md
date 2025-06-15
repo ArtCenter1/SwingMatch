@@ -2,25 +2,26 @@
 
 ## 1. Introduction/Overview
 
-SwingMatch is an innovative AI-powered mobile application designed to revolutionize tennis coaching by providing personalized stroke analysis, professional player comparisons, and AI-generated improvement simulations. The application democratizes professional coaching by offering actionable, real-time feedback through advanced computer vision and machine learning technologies.
+SwingMatch is an innovative AI-powered mobile application designed to revolutionize tennis coaching by providing personalized stroke analysis, professional player comparisons, and AI-generated improvement simulations. The application democratizes professional coaching by offering actionable, real-time feedback through advanced computer vision and machine learning technologies, while integrating educational content through YouTube video lessons.
 
-**Problem Statement:** Traditional tennis coaching is expensive, time-consuming, and not accessible to all players. Many tennis enthusiasts lack access to professional coaching and struggle to identify and correct technical flaws in their strokes.
+**Problem Statement:** Traditional tennis coaching is expensive, time-consuming, and not accessible to all players. Many tennis enthusiasts lack access to professional coaching and struggle to identify and correct technical flaws in their strokes. Additionally, players often lack structured learning resources and visual feedback to understand proper technique.
 
-**Solution:** SwingMatch leverages AI and computer vision to provide instant, professional-level stroke analysis and personalized improvement recommendations through a mobile-first platform.
+**Solution:** SwingMatch leverages AI and computer vision to provide instant, professional-level stroke analysis with visual overlay indicators, personalized improvement recommendations, and integrated YouTube educational content through a mobile-first platform.
 
 ## 2. Goals
 
 ### Primary Goals
 1. **Democratize Tennis Coaching:** Make professional-level stroke analysis accessible to players of all skill levels
-2. **Improve Player Performance:** Provide actionable insights that lead to measurable improvement in stroke technique
-3. **Enhance Learning Experience:** Create an engaging, interactive platform that motivates continuous improvement
-4. **Scale Globally:** Build a platform that can serve millions of users worldwide with consistent quality
+2. **Improve Player Performance:** Provide actionable insights with visual feedback that lead to measurable improvement in stroke technique
+3. **Enhance Learning Experience:** Create an engaging, interactive platform with integrated educational content that motivates continuous improvement
+4. **Scale Globally:** Build a platform that can serve millions of users worldwide with consistent quality and performance
 
 ### Success Metrics
 - **User Engagement:** 70% of users complete at least 3 analysis sessions within their first month
 - **Retention:** 40% monthly active user retention rate
 - **Performance:** <60 seconds average analysis completion time
-- **Quality:** >85% user satisfaction rating for analysis accuracy
+- **Quality:** >85% user satisfaction rating for analysis accuracy and visual feedback
+- **Educational Engagement:** 60% of users access YouTube lesson content within first week
 - **Growth:** 100,000 active users within 12 months of launch
 
 ## 3. User Stories
@@ -28,21 +29,26 @@ SwingMatch is an innovative AI-powered mobile application designed to revolution
 ### Core User Stories
 
 **As a recreational tennis player, I want to:**
-- Record my tennis strokes using my phone so that I can analyze my technique
-- Receive detailed feedback on my stroke mechanics so that I can understand what to improve
+- Record my tennis strokes using my phone with AR guidance so that I can capture optimal footage for analysis
+- Edit my videos with simple trimming, replay, and retake options so that I can submit the best clips
+- Receive detailed feedback with visual overlay indicators on my stroke mechanics so that I can clearly understand what to improve
+- Access YouTube lesson videos for basic stroke instruction so that I can learn proper fundamentals
 - Compare my strokes to professional players so that I can learn proper technique
 - See a simulation of my improved stroke so that I can visualize the correct form
+- Organize my sessions with tags and notes so that I can track specific aspects of my game
 - Track my progress over time so that I can measure my improvement
 
 **As a tennis coach, I want to:**
-- Use the app to provide objective analysis to my students
+- Use the app to provide objective analysis with visual indicators to my students
 - Access detailed biomechanical data to support my coaching decisions
-- Share analysis results with students for homework practice
+- Share analysis results and educational YouTube content with students for homework practice
+- Help students organize their practice sessions with proper tagging and notes
 
 **As a competitive player, I want to:**
-- Analyze specific aspects of my game that need improvement
-- Compare my technique to pros with similar playing styles
-- Track consistency metrics across multiple sessions
+- Analyze specific aspects of my game with precise visual feedback that need improvement
+- Compare my technique to pros with similar playing styles and physical characteristics
+- Track consistency metrics across multiple sessions with detailed historical data
+- Access automatic YouTube references for stroke types to supplement my training
 
 ## 4. Functional Requirements
 
@@ -128,7 +134,7 @@ SwingMatch is an innovative AI-powered mobile application designed to revolution
 
 ### Architecture
 - **Mobile Framework:** React Native with TypeScript for cross-platform development
-- **Backend:** Microservices architecture with Node.js/Express or Python/FastAPI
+- **Backend:** Microservices architecture with Python/FastAPI
 - **Database:** PostgreSQL for relational data with Redis for caching
 - **File Storage:** AWS S3 with CloudFront CDN for global video delivery
 - **AI Processing:** Asynchronous job processing using SQS/Lambda for scalability
