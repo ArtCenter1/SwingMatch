@@ -12,19 +12,19 @@ II. Core Functionality and Features
         ◦AR guidance for phone positioning is a critical feature to ensure optimal video quality for AI analysis (Claude, Groke) 
         ◦Users can record tennis sessions directly within the app and do simpple trimming.
         ◦Users can replay the clip, retake tennis sessions, or add tags for sorting.
+        ◦Automatic Youtube video link referencing for stroke types.
         ◦High-quality video capture (1080p, 60fps preferred) with local storage and cloud sync capabilities.
+        ◦In app Youtube video rplay for basic stroke lesson.
 
     •AI Stroke Analysis Engine:
         ◦Utilizes computer vision and pose estimation (e.g., MediaPipe) to analyze strokes frame-by-frame.
-        ◦Identifies key biomechanical metrics (joint angles, timing, power transfer) and stroke consistency.
-        ◦Classifies stroke types (forehand, backhand, serve, volley).
-        ◦Automatic Youtube video link referencing for stroke types.
+        ◦Identifies key biomechanical metrics (joint angles, timing, power transfer) and stroke consistency.  
         ◦Provides detailed, text-based improvement suggestions (Gemini, Groke, Claude).
+        ◦Visal overlay indicator for clear and better comunication.
 
     •Progress Tracking & Session Management:
         ◦Allows users to manage and organize recorded sessions with notes and tags.
         ◦Tracks consistency and progress over time through historical data.
-        ◦"As a user, I view trends over time." (chatGPT).
 
     •Professional Player Comparison:
         ◦Users can compare their strokes to a curated library of professional player techniques.
@@ -34,26 +34,25 @@ II. Core Functionality and Features
     •AI-Generated Improvement Simulation:
         ◦The most advanced feature: generating a video of the user performing their stroke with corrected form.
         ◦Requires sophisticated video manipulation and deep learning techniques (GANs or diffusion models, pose-guided video generation).
-        ◦"As a user, I want multiple improvement scenarios (conservative vs aggressive changes)" (Claude).
-        ◦"As a user, I want a video of myself with improved strokes so I can share my progress." (Groke).
     
     •Additional Features Mentioned:
         ◦Drill recommendations based on analysis (chatGPT).
         ◦Notifications (push notifications for analysis completion).
         ◦Admin portal for content management (chatGPT).
         ◦Potential social features and sharing capabilities.
+
 III. System Architecture and Technology Stack
     The architecture is consistently envisioned as a mobile client interacting with a cloud-based microservices backend, emphasizing scalability, performance, and maintainability.
     A. Architecture Overview
-    •Mobile Application: The user-facing component, responsible for UI, video capture, playback, and communication with the backend. React Native is the overwhelmingly preferred framework for cross-platform development, Expo Go can be used for development and testing.
-    •API Gateway: Serves as the entry point for all mobile app requests, handling authentication, routing, and rate limiting.
-    •Microservices Backend: A set of independent services handling specific functionalities. Common services include:
-        ◦Analysis Service: Manages the AI analysis process and stores results.
-        ◦User Management Service: Authentication, user profiles, preferences.
-        ◦Video Processing Service: Handles video upload, compression, metadata extraction, and storage.
-        ◦AI Analysis Engine/Worker: The core brain, performing pose estimation, stroke analysis, comparison, and simulation generation. This is often an asynchronous process.
-        ◦Content Management Service: Manages the professional player library and educational content.
-        ◦Notification Service: Manages push notifications.
+        •Mobile Application: The user-facing component, responsible for UI, video capture, playback, and communication with the backend. React Native is the overwhelmingly preferred framework for cross-platform development, Expo Go can be used for development and testing.
+        •API Gateway: Serves as the entry point for all mobile app requests, handling authentication, routing, and rate limiting.
+        •Microservices Backend: A set of independent services handling specific functionalities. Common services include:
+            ◦Analysis Service: Manages the AI analysis process and stores results.
+            ◦User Management Service: Authentication, user profiles, preferences.
+            ◦Video Processing Service: Handles video upload, compression, metadata extraction, and storage.
+            ◦AI Analysis Engine/Worker: The core brain, performing pose estimation, stroke analysis, comparison, and simulation generation. This is often an asynchronous process.
+            ◦Content Management Service: Manages the professional player library and educational content.
+            ◦Notification Service: Manages push notifications.
     •Data Flow:
         1.User records video on mobile app.
         2.Video uploaded to cloud storage (typically S3) via pre-signed URLs to avoid proxying large files through the API server.
