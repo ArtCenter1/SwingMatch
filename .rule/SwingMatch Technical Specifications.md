@@ -62,7 +62,7 @@ III. System Architecture and Technology Stack
         6.Results are updated in the database.
         7.User is notified via push notification when analysis is complete.
     B. Technology Stack Recommendations
-    •Mobile Framework: React Native (unanimous for cross-platform development) with TypeScript. Expo is mentioned for simplified setup (Gemini).
+    •Mobile Framework: React Native (unanimous for cross-platform development) with TypeScript and Expo Go for simplified setup. Video playback using Video.js  (Gemini).
     •Backend:
         ◦Python with FastAPI (chatGPT, Gemini) for better ML library integration.
         ◦Asynchronous job processing with Celery/RabbitMQ (chatGPT) or SQS (Gemini, Claude) and Bull Queue with Redis (Claude).
