@@ -1,6 +1,5 @@
-# Ignore all files and folders
-*
+# Ignore only files and folders that start with a dot
+.*
 
-# Except the docs folder and its contents
+# But don't ignore the docs folder
 !docs/
-!docs/**
