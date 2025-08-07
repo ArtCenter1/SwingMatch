@@ -47,6 +47,12 @@ Traditional coaching is expensive and fragmented. Existing apps fail to unify tr
 
 ---
 
+### **Immediate Priority: High-Fidelity Clickable Prototype**
+
+- **Objective:** Develop a high-fidelity, clickable prototype that demonstrates the core user flow of video capture, AI analysis, and simulation.
+- **Purpose:** Secure early user feedback, validate the core value proposition, and support the next round of funding.
+- **Scope:** The prototype will be non-functional on the backend but will accurately represent the final UI/UX. It must fully implement the established design tokens, color themes, and component library to ensure the user flow can be tested with perfect fidelity before any functional backend development begins.
+
 ## **3. User Personas**
 
 **Primary: Enthusiastic Amateur**
