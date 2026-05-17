@@ -59,8 +59,16 @@ export function useAgent(options: UseAgentOptions = {}): UseAgentReturn {
 
   // Initialise agent + load history on mount
   useEffect(() => {
-    agentService.init();
-    chatSession.current = agentService.startSession(configRef.current);
+    const initSession = async () => {
+      try {
+        await agentService.init();
+        chatSession.current = await agentService.startSession(configRef.current);
+      } catch (err) {
+        console.warn('[useAgent] Lazy session initialization skipped or failed:', err);
+      }
+    };
+    
+    initSession();
 
     // Load persisted messages if DB enabled
     if (FEATURES.localDatabase && options.sessionId) {
@@ -102,7 +110,7 @@ export function useAgent(options: UseAgentOptions = {}): UseAgentReturn {
   }, [sessionId]);
 
   const sendMessage = useCallback(async (text: string, imageBase64?: string) => {
-    if (!text.trim() || isLoading || !chatSession.current) return;
+    if (!text.trim() || isLoading) return;
 
     setError(null);
     setIsLoading(true);
@@ -110,6 +118,12 @@ export function useAgent(options: UseAgentOptions = {}): UseAgentReturn {
     addMessage({ role: 'user', content: text, imageUri: imageBase64 ? 'inline' : undefined });
 
     try {
+      // Lazily initialize session if not present (e.g. key was just entered)
+      if (!chatSession.current) {
+        await agentService.init();
+        chatSession.current = await agentService.startSession(configRef.current);
+      }
+
       const response = await agentService.sendMessage(
         chatSession.current,
         text,
@@ -151,10 +165,15 @@ export function useAgent(options: UseAgentOptions = {}): UseAgentReturn {
     }
   }, [addMessage]);
 
-  const clearChat = useCallback(() => {
+  const clearChat = useCallback(async () => {
     setMessages([]);
     setError(null);
-    chatSession.current = agentService.startSession(configRef.current);
+    try {
+      chatSession.current = await agentService.startSession(configRef.current);
+    } catch (err) {
+      chatSession.current = null;
+      console.warn('[useAgent] Failed to reset session on clear:', err);
+    }
     if (FEATURES.localDatabase) {
       dbService.deleteSession(sessionId).catch(console.error);
     }

@@ -55,9 +55,7 @@ export const ENV = {
 
   // ── Gemini ────────────────────────────────────────────────
   gemini: {
-    apiKey: FEATURES.gemini
-      ? requireEnv('EXPO_PUBLIC_GEMINI_API_KEY', 'gemini')
-      : '',
+    apiKey: optionalEnv('EXPO_PUBLIC_GEMINI_API_KEY', ''),
     // Model options:
     //   gemini-2.5-flash  → fast, great for chat + tool calling (recommended)
     //   gemini-2.5-pro    → most capable, slower, higher cost

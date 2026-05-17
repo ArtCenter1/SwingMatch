@@ -19,13 +19,15 @@
  * ============================================================
  */
 
-import React, { useCallback } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useCallback, useState, useEffect } from 'react';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAgent } from '../../src/hooks/useAgent';
 import { AgentChat } from '../../src/components/chat/AgentChat';
 import { useAuth } from '../../src/lib/auth.context';
 import { FEATURES } from '../../src/config/features';
+import { apiKeyService } from '../../src/services/api-key.service';
+import { ApiKeySetup } from '../../src/components/shared/ApiKeySetup';
 
 // ── CUSTOMISE THIS PER PROJECT ─────────────────────────────────
 const AGENT_CONFIG = {
@@ -50,6 +52,15 @@ const PLACEHOLDER = 'Ask about tennis tips, search drills, or analyze a swing...
 export default function ChatScreen() {
   const router = useRouter();
   const { user } = useAuth();
+  const [hasKey, setHasKey] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkKey = async () => {
+      const active = await apiKeyService.hasApiKey();
+      setHasKey(active);
+    };
+    checkKey();
+  }, []);
 
   const agent = useAgent({
     config: AGENT_CONFIG,
@@ -59,6 +70,20 @@ export default function ChatScreen() {
   const handleCameraPress = useCallback(() => {
     if (FEATURES.camera) router.push('/(app)/camera');
   }, [router]);
+
+  if (hasKey === null) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0284c7" />
+      </View>
+    );
+  }
+
+  if (!hasKey) {
+    return (
+      <ApiKeySetup onSuccess={() => setHasKey(true)} />
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -74,6 +99,7 @@ export default function ChatScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 52 },
+  container: { flex: 1, paddingTop: 52, backgroundColor: '#f9fafb' },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0f172a' },
   chat: { flex: 1 },
 });

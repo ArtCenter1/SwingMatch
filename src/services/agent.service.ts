@@ -33,6 +33,7 @@ import {
 import { FEATURES } from '../config/features';
 import { ENV } from '../config/env';
 import { buildToolRegistry, type RegisteredTool } from '../tools/tool.registry';
+import { apiKeyService } from './api-key.service';
 
 // ── Types ──────────────────────────────────────────────────────
 
@@ -72,16 +73,26 @@ class GeminiAgentService {
 
   // ── Initialisation ─────────────────────────────────────────
 
-  init() {
+  async init() {
     if (!FEATURES.gemini) return;
-    this.client = new GoogleGenerativeAI(ENV.gemini.apiKey);
+    const apiKey = await apiKeyService.getApiKey();
+    if (!apiKey) return;
+    this.client = new GoogleGenerativeAI(apiKey);
     this.toolRegistry = buildToolRegistry();
   }
 
-  private getClient(): GoogleGenerativeAI {
-    if (!this.client) this.init();
-    if (!this.client) throw new Error('Gemini client not initialised');
+  private async getClient(): Promise<GoogleGenerativeAI> {
+    if (!this.client) {
+      await this.init();
+    }
+    if (!this.client) {
+      throw new Error('Gemini API key is not configured. Please go to settings and add your API key.');
+    }
     return this.client;
+  }
+
+  resetClient() {
+    this.client = null;
   }
 
   // ── Activity bus ───────────────────────────────────────────
@@ -97,10 +108,11 @@ class GeminiAgentService {
 
   // ── Build model ────────────────────────────────────────────
 
-  private buildModel(config: AgentConfig = {}): GenerativeModel {
+  private async buildModel(config: AgentConfig = {}): Promise<GenerativeModel> {
     const toolDeclarations = this.toolRegistry.map(t => t.declaration as FunctionDeclaration);
+    const client = await this.getClient();
 
-    return this.getClient().getGenerativeModel({
+    return client.getGenerativeModel({
       model: config.model ?? ENV.gemini.model,
       systemInstruction: config.systemPrompt,
       generationConfig: {
@@ -119,8 +131,8 @@ class GeminiAgentService {
    * Start a new chat session. Returns a session object you hold
    * onto and pass back to sendMessage() for conversation history.
    */
-  startSession(config: AgentConfig = {}): ChatSession {
-    const model = this.buildModel(config);
+  async startSession(config: AgentConfig = {}): Promise<ChatSession> {
+    const model = await this.buildModel(config);
     return model.startChat({ history: [] });
   }
 
@@ -244,7 +256,8 @@ class GeminiAgentService {
       return '[Vision disabled] Cannot analyse image.';
     }
 
-    const model = this.getClient().getGenerativeModel({
+    const client = await this.getClient();
+    const model = client.getGenerativeModel({
       model: config.model ?? ENV.gemini.visionModel,
       systemInstruction: config.systemPrompt,
     });
@@ -270,7 +283,8 @@ class GeminiAgentService {
       return '[Vision disabled] Cannot analyse video.';
     }
 
-    const model = this.getClient().getGenerativeModel({
+    const client = await this.getClient();
+    const model = client.getGenerativeModel({
       model: config.model ?? ENV.gemini.visionModel,
       systemInstruction: config.systemPrompt,
     });
@@ -290,7 +304,7 @@ class GeminiAgentService {
 
   async quickMessage(prompt: string, config: AgentConfig = {}): Promise<string> {
     if (!FEATURES.gemini) return `[Gemini disabled] Prompt: "${prompt}"`;
-    const model = this.buildModel(config);
+    const model = await this.buildModel(config);
     const result = await model.generateContent(prompt);
     return result.response.text();
   }
