@@ -78,6 +78,12 @@ export const FEATURES = {
     // Get current date/time (useful for scheduling context).
     getCurrentTime: true,
 
+    // Persist swing analysis to biomechanics DB after each camera analysis.
+    logSwingAnalysis: true,
+
+    // Return player analytics (total sessions, avg score, common faults).
+    getPlayerAnalytics: true,
+
     // Placeholder for your custom tools — add more here.
     // See: src/tools/ for how to implement a tool.
     // customTool: false,
@@ -101,6 +107,10 @@ export const FEATURES = {
   // Stores: chat history, saved videos, analysis results, settings.
   // If false → nothing persisted between sessions.
   localDatabase: true,
+
+  // Biomechanics history: enable swing analysis persistence +
+  // progress analytics. Requires: localDatabase: true
+  biomechanicsHistory: true,
 
   // ── UI COMPONENTS ──────────────────────────────────────────
   // Pre-built chat bubble interface (user right, agent left).

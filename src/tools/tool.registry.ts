@@ -173,6 +173,78 @@ async function handleGetCurrentTime(_params: Record<string, unknown>): Promise<s
   });
 }
 
+/**
+ * TOOL: log_swing_analysis
+ * Persist a completed swing analysis to the biomechanics database.
+ * Gemini calls this after presenting a full camera analysis so the
+ * record is stored long-term without any user action required.
+ */
+async function handleLogSwingAnalysis(params: Record<string, unknown>): Promise<string> {
+  const { biomechanicsDbService } = await import('../db/biomechanics.db.service');
+  try {
+    const rawText = params.rawText as string;
+    if (!rawText) return JSON.stringify({ success: false, error: 'rawText is required.' });
+
+    await biomechanicsDbService.persistAnalysis({
+      rawText,
+      videoUri: (params.videoUri as string) ?? undefined,
+      durationSeconds: (params.durationSeconds as number) ?? undefined,
+    });
+
+    return JSON.stringify({
+      success: true,
+      message: 'Swing analysis saved to the biomechanics database.',
+      parsed: biomechanicsDbService.parseAnalysisText(rawText),
+    });
+  } catch (err) {
+    return JSON.stringify({ success: false, error: String(err) });
+  }
+}
+
+/**
+ * TOOL: get_player_analytics
+ * Return aggregated player analytics from the biomechanics database.
+ * Use this when the user asks "how am I doing?", "show my progress",
+ * "what's my best shot?", or "what fault do I repeat most?".
+ */
+async function handleGetPlayerAnalytics(params: Record<string, unknown>): Promise<string> {
+  const { biomechanicsDbService } = await import('../db/biomechanics.db.service');
+  try {
+    const limit = (params.limit as number) ?? 10;
+    const shotType = (params.shotType as string) ?? undefined;
+
+    const [summary, stats, byShot, byCategory] = await Promise.all([
+      biomechanicsDbService.getProgressSummary(),
+      biomechanicsDbService.getPlayerStats(),
+      biomechanicsDbService.getSessionsByShotType(),
+      biomechanicsDbService.getCorrectionsByCategory(),
+    ]);
+
+    let sessions = summary.sessions;
+    if (shotType) {
+      sessions = sessions.filter((s) => s.shotType.toLowerCase() === shotType.toLowerCase());
+    }
+
+    return JSON.stringify({
+      success: true,
+      totalSessions: summary.totalSessions,
+      avgScore: summary.avgScore,
+      bestScore: summary.bestScore,
+      recentSessions: sessions.slice(0, limit).map((s) => ({
+        id: s.id,
+        shotType: s.shotType,
+        overallScore: s.overallScore,
+        createdAt: s.createdAt,
+        emotion: s.emotion,
+      })),
+      shotTypeBreakdown: byShot,
+      commonCorrections: byCategory.slice(0, 8),
+    });
+  } catch (err) {
+    return JSON.stringify({ success: false, error: String(err) });
+  }
+}
+
 // ── Tool Declarations (what Gemini sees) ───────────────────────
 
 const YOUTUBE_SEARCH_DECLARATION = {
@@ -285,6 +357,50 @@ const GET_CURRENT_TIME_DECLARATION = {
   },
 };
 
+const LOG_SWING_ANALYSIS_DECLARATION = {
+  name: 'log_swing_analysis',
+  description:
+    'Persist the current swing analysis to the biomechanics database so the player coaching history is tracked over time. Call this after delivering a full camera analysis to the user.',
+  parameters: {
+    type: SchemaType.OBJECT,
+    properties: {
+      rawText: {
+        type: SchemaType.STRING,
+        description: 'The full raw text of the Gemini swing analysis (everything that was shown to the user).',
+      },
+      videoUri: {
+        type: SchemaType.STRING,
+        description: 'Optional local file URI of the recorded video that was analysed.',
+      },
+      durationSeconds: {
+        type: SchemaType.NUMBER,
+        description: 'Duration of the swing video clip in seconds.',
+      },
+    },
+    required: ['rawText'],
+  },
+};
+
+const GET_PLAYER_ANALYTICS_DECLARATION = {
+  name: 'get_player_analytics',
+  description:
+    'Return aggregated player swing analytics from the biomechanics database — total sessions, average score, best score, common faults, and recent session history. Use this when the user asks about progress, improvements, or repeated technique faults.',
+  parameters: {
+    type: SchemaType.OBJECT,
+    properties: {
+      limit: {
+        type: SchemaType.NUMBER,
+        description: 'Max number of recent sessions to include (default 10).',
+      },
+      shotType: {
+        type: SchemaType.STRING,
+        description: 'Optional filter: only return sessions for this shot type (e.g. "Serve", "Forehand").',
+      },
+    },
+    required: [],
+  },
+};
+
 // ── Registry Builder ───────────────────────────────────────────
 
 /**
@@ -308,6 +424,12 @@ export function buildToolRegistry(): RegisteredTool[] {
   }
   if (isToolEnabled('getCurrentTime')) {
     tools.push({ declaration: GET_CURRENT_TIME_DECLARATION, handler: handleGetCurrentTime });
+  }
+  if (isToolEnabled('logSwingAnalysis')) {
+    tools.push({ declaration: LOG_SWING_ANALYSIS_DECLARATION, handler: handleLogSwingAnalysis });
+  }
+  if (isToolEnabled('getPlayerAnalytics')) {
+    tools.push({ declaration: GET_PLAYER_ANALYTICS_DECLARATION, handler: handleGetPlayerAnalytics });
   }
 
   return tools;

@@ -21,6 +21,7 @@ import {
 import { useRouter } from 'expo-router';
 import { cameraService } from '../../src/services/camera.service';
 import { agentService } from '../../src/services/agent.service';
+import { biomechanicsDbService } from '../../src/db/biomechanics.db.service';
 import { FEATURES } from '../../src/config/features';
 
 // ── CUSTOMISE THIS PER PROJECT ─────────────────────────────────
@@ -60,14 +61,23 @@ export default function CameraScreen() {
         // Extract frames and send to Gemini Vision
         const frames = await cameraService.extractFrames(media.uri, 8, media.duration);
 
+        let result: string;
         if (frames.length > 0) {
-          const result = await agentService.analyzeVideoFrames(frames, ANALYSIS_PROMPT);
-          setAnalysis(result);
+          result = await agentService.analyzeVideoFrames(frames, ANALYSIS_PROMPT);
         } else {
           // Fallback: just analyse the first frame as image
           const base64 = await cameraService.imageUriToBase64(media.uri);
-          const result = await agentService.analyzeImage(base64, ANALYSIS_PROMPT);
-          setAnalysis(result);
+          result = await agentService.analyzeImage(base64, ANALYSIS_PROMPT);
+        }
+        setAnalysis(result);
+
+        // Fire-and-forget: persist biomechanics analysis to local DB
+        if (FEATURES.biomechanicsHistory) {
+          biomechanicsDbService.persistAnalysis({
+            rawText: result,
+            videoUri: media.uri,
+            durationSeconds: media.duration,
+          }).catch(console.warn);
         }
       }
 
@@ -87,6 +97,12 @@ export default function CameraScreen() {
       const base64 = await cameraService.imageUriToBase64(media.uri);
       const result = await agentService.analyzeImage(base64, ANALYSIS_PROMPT);
       setAnalysis(result);
+
+      // Fire-and-forget: persist biomechanics analysis to local DB
+      if (FEATURES.biomechanicsHistory) {
+        biomechanicsDbService.persistAnalysis({ rawText: result }).catch(console.warn);
+      }
+
       setStatus('done');
     } catch (err) {
       console.error('[CameraScreen]', err);
@@ -103,14 +119,28 @@ export default function CameraScreen() {
 
       if (media.type === 'video' && FEATURES.videoFrameExtraction) {
         const frames = await cameraService.extractFrames(media.uri, 8, media.duration);
+        let result: string;
         if (frames.length > 0) {
-          const result = await agentService.analyzeVideoFrames(frames, ANALYSIS_PROMPT);
-          setAnalysis(result);
+          result = await agentService.analyzeVideoFrames(frames, ANALYSIS_PROMPT);
+        } else {
+          const base64 = await cameraService.imageUriToBase64(media.uri);
+          result = await agentService.analyzeImage(base64, ANALYSIS_PROMPT);
+        }
+        setAnalysis(result);
+
+        // Fire-and-forget: persist biomechanics analysis to local DB
+        if (FEATURES.biomechanicsHistory) {
+          biomechanicsDbService.persistAnalysis({ rawText: result, videoUri: media.uri }).catch(console.warn);
         }
       } else {
         const base64 = await cameraService.imageUriToBase64(media.uri);
         const result = await agentService.analyzeImage(base64, ANALYSIS_PROMPT);
         setAnalysis(result);
+
+        // Fire-and-forget: persist biomechanics analysis to local DB
+        if (FEATURES.biomechanicsHistory) {
+          biomechanicsDbService.persistAnalysis({ rawText: result }).catch(console.warn);
+        }
       }
 
       setStatus('done');
@@ -185,7 +215,7 @@ export default function CameraScreen() {
         {/* Analysing state */}
         {status === 'analysing' && (
           <View style={styles.centre}>
-            <ActivityIndicator size="large" color="#6366f1" />
+            <ActivityIndicator size="large" color="#84CC16" />
             <Text style={styles.analysingText}>Analysing with Gemini…</Text>
             <Text style={styles.analysingSubText}>This usually takes 5–15 seconds</Text>
           </View>
@@ -217,46 +247,45 @@ export default function CameraScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f9fafb' },
+  container: { flex: 1, backgroundColor: '#111111' },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingTop: 56, paddingBottom: 12, paddingHorizontal: 16,
-    backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#e5e7eb',
+    backgroundColor: '#1A1A1A', borderBottomWidth: 1, borderBottomColor: '#1F1F1F',
   },
   backBtn: { width: 60 },
-  backText: { color: '#6366f1', fontSize: 15 },
-  headerTitle: { fontSize: 16, fontWeight: '600', color: '#111827' },
+  backText: { color: '#84CC16', fontSize: 15, fontWeight: '600' as const },
+  headerTitle: { fontSize: 16, fontWeight: '600' as const, color: '#F5F5F5' },
   content: { padding: 20, gap: 16 },
   actions: { gap: 12 },
   btn: {
     borderRadius: 16, padding: 20, alignItems: 'center', gap: 4,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,
+    borderWidth: 1,
   },
-  btnPrimary: { backgroundColor: '#6366f1' },
-  btnSecondary: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#e5e7eb' },
+  btnPrimary: { backgroundColor: '#84CC16', borderColor: '#84CC16' },
+  btnSecondary: { backgroundColor: '#1A1A1A', borderColor: '#2A2A2A' },
   btnEmoji: { fontSize: 32, marginBottom: 4 },
-  btnText: { fontSize: 16, fontWeight: '700', color: '#fff' },
-  btnSub: { fontSize: 12, color: '#c7d2fe' },
-  btnTextDark: { fontSize: 16, fontWeight: '700', color: '#111827' },
-  btnSubDark: { fontSize: 12, color: '#6b7280' },
+  btnText: { fontSize: 16, fontWeight: '700' as const, color: '#111111' },
+  btnSub: { fontSize: 12, color: '#4D7A0A' },
+  btnTextDark: { fontSize: 16, fontWeight: '700' as const, color: '#F5F5F5' },
+  btnSubDark: { fontSize: 12, color: '#A0A0A0' },
   centre: { alignItems: 'center', paddingVertical: 60, gap: 12 },
-  analysingText: { fontSize: 16, fontWeight: '600', color: '#111827' },
-  analysingSubText: { fontSize: 13, color: '#6b7280' },
+  analysingText: { fontSize: 16, fontWeight: '600' as const, color: '#F5F5F5' },
+  analysingSubText: { fontSize: 13, color: '#A0A0A0' },
   resultCard: {
-    backgroundColor: '#fff', borderRadius: 16, padding: 20,
-    borderWidth: 1, borderColor: '#e5e7eb', gap: 12,
+    backgroundColor: '#1A1A1A', borderRadius: 14, padding: 20,
+    borderWidth: 1, borderColor: '#2A2A2A', gap: 12,
   },
-  resultTitle: { fontSize: 16, fontWeight: '700', color: '#111827' },
-  resultText: { fontSize: 14, color: '#374151', lineHeight: 22 },
+  resultTitle: { fontSize: 16, fontWeight: '700' as const, color: '#F5F5F5' },
+  resultText: { fontSize: 14, color: '#A0A0A0', lineHeight: 22 },
   chatBtn: {
-    backgroundColor: '#6366f1', borderRadius: 10,
+    backgroundColor: '#84CC16', borderRadius: 10,
     padding: 14, alignItems: 'center', marginTop: 4,
   },
-  chatBtnText: { color: '#fff', fontWeight: '600', fontSize: 15 },
+  chatBtnText: { color: '#111111', fontWeight: '600' as const, fontSize: 15 },
   errorCard: { alignItems: 'center', gap: 8, paddingVertical: 40 },
-  errorText: { color: '#dc2626', fontSize: 14 },
-  link: { color: '#6366f1', fontSize: 14, fontWeight: '600' },
+  errorText: { color: '#EF4444', fontSize: 14 },
+  link: { color: '#84CC16', fontSize: 14, fontWeight: '600' as const },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
-  offText: { color: '#6b7280', fontSize: 14 },
+  offText: { color: '#606060', fontSize: 14 },
 });

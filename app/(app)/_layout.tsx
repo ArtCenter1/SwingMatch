@@ -1,9 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Tabs, Stack } from 'expo-router';
 import { Text } from 'react-native';
 import { FEATURES } from '../../src/config/features';
+import { dbService } from '../../src/db/db.service';
+import { biomechanicsDbService } from '../../src/db/biomechanics.db.service';
 
 export default function AppLayout() {
+  useEffect(() => {
+    dbService.init();
+    if (FEATURES.biomechanicsHistory) biomechanicsDbService.init();
+  }, []);
+
   if (!FEATURES.bottomTabs) {
     // No tabs — use a plain Stack instead
     return <Stack screenOptions={{ headerShown: false }} />;
@@ -13,11 +20,17 @@ export default function AppLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#6366f1',
-        tabBarInactiveTintColor: '#9ca3af',
+        tabBarActiveTintColor: '#84CC16',
+        tabBarInactiveTintColor: '#606060',
         tabBarStyle: {
-          backgroundColor: '#fff',
-          borderTopColor: '#e5e7eb',
+          backgroundColor: '#111111',
+          borderTopColor: '#1F1F1F',
+          height: 83,
+        },
+        tabBarLabelStyle: {
+          fontFamily: 'Inter',
+          fontSize: 12,
+          fontWeight: '500' as const,
         },
       }}
     >
@@ -37,6 +50,12 @@ export default function AppLayout() {
           options={{ title: 'Library', tabBarIcon: ({ color }) => <TabIcon emoji="📚" color={color} /> }}
         />
       )}
+      {FEATURES.biomechanicsHistory && (
+        <Tabs.Screen
+          name="progress"
+          options={{ title: 'Progress', tabBarIcon: ({ color }) => <TabIcon emoji="📈" color={color} /> }}
+        />
+      )}
       <Tabs.Screen
         name="settings"
         options={{ title: 'Settings', tabBarIcon: ({ color }) => <TabIcon emoji="⚙️" color={color} /> }}
@@ -46,5 +65,5 @@ export default function AppLayout() {
 }
 
 function TabIcon({ emoji, color }: { emoji: string; color: string }) {
-  return <Text style={{ fontSize: 20, opacity: color === '#6366f1' ? 1 : 0.5 }}>{emoji}</Text>;
+  return <Text style={{ fontSize: 20, opacity: color === '#84CC16' ? 1 : 0.5 }}>{emoji}</Text>;
 }

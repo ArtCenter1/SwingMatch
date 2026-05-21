@@ -87,6 +87,43 @@ class DbService {
 
       CREATE INDEX IF NOT EXISTS idx_library_type ON library_items(type);
       CREATE INDEX IF NOT EXISTS idx_messages_session ON chat_messages(session_id);
+
+      -- ── Biomechanics Analytics ─────────────────────────────────
+      CREATE TABLE IF NOT EXISTS swing_sessions (
+        id                INTEGER PRIMARY KEY AUTOINCREMENT,
+        shot_type         TEXT    NOT NULL,
+        overall_score     INTEGER,
+        assessment_score  INTEGER,
+        raw_text          TEXT    NOT NULL,
+        video_uri         TEXT,
+        emotion           TEXT,
+        duration_seconds  INTEGER,
+        created_at        INTEGER NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS biomechanics_corrections (
+        id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        session_id  INTEGER NOT NULL REFERENCES swing_sessions(id) ON DELETE CASCADE,
+        category    TEXT    NOT NULL,
+        description TEXT    NOT NULL,
+        severity    TEXT    NOT NULL DEFAULT 'medium' CHECK(severity IN ('low','medium','high'))
+      );
+
+      CREATE TABLE IF NOT EXISTS player_stats (
+        id             INTEGER PRIMARY KEY CHECK(id = 1),
+        total_sessions INTEGER NOT NULL DEFAULT 0,
+        avg_score      REAL    NOT NULL DEFAULT 0,
+        best_score     INTEGER NOT NULL DEFAULT 0,
+        common_fault   TEXT    NOT NULL DEFAULT '',
+        streak_days    INTEGER NOT NULL DEFAULT 0,
+        strengths_json TEXT   NOT NULL DEFAULT '{}',
+        updated_at     INTEGER NOT NULL
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_sessions_created  ON swing_sessions(created_at);
+      CREATE INDEX IF NOT EXISTS idx_sessions_shot     ON swing_sessions(shot_type);
+      CREATE INDEX IF NOT EXISTS idx_corrections_sess  ON biomechanics_corrections(session_id);
+      CREATE INDEX IF NOT EXISTS idx_corrections_cat   ON biomechanics_corrections(category);
     `);
   }
 
