@@ -4,7 +4,7 @@ import { useAuth } from '../../src/lib/auth.context';
 import { ENV } from '../../src/config/env';
 
 export default function LoginScreen() {
-  const { signIn, isLoading } = useAuth();
+  const { signIn, signInAsGuest, isLoading } = useAuth();
 
   return (
     <View style={styles.container}>
@@ -15,8 +15,17 @@ export default function LoginScreen() {
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Get started</Text>
-        <Text style={styles.cardSub}>Sign in to continue</Text>
+        <Text style={styles.cardTitle}>Get Started</Text>
+        <Text style={styles.cardSub}>Sign in or continue to the court</Text>
+
+        <TouchableOpacity
+          style={styles.guestBtn}
+          onPress={signInAsGuest}
+          disabled={isLoading}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.guestBtnText}>Continue as Guest</Text>
+        </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.googleBtn}
@@ -24,19 +33,20 @@ export default function LoginScreen() {
           disabled={isLoading}
           activeOpacity={0.85}
         >
-          {isLoading
-            ? <ActivityIndicator color="#374151" />
-            : (
-              <>
-                <View style={styles.gIcon}><Text style={styles.gIconText}>G</Text></View>
-                <Text style={styles.googleBtnText}>Continue with Google</Text>
-              </>
-            )
-          }
+          {isLoading ? (
+            <ActivityIndicator color="#F5F5F5" />
+          ) : (
+            <>
+              <View style={styles.gIcon}>
+                <Text style={styles.gIconText}>G</Text>
+              </View>
+              <Text style={styles.googleBtnText}>Continue with Google</Text>
+            </>
+          )}
         </TouchableOpacity>
 
         <Text style={styles.terms}>
-          By signing in you agree to Google's Terms of Service.
+          By signing in you agree to Google's Terms of Service and access policies.
         </Text>
       </View>
     </View>
@@ -44,30 +54,107 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f9fafb', alignItems: 'center', justifyContent: 'center', padding: 24 },
-  hero: { alignItems: 'center', marginBottom: 48 },
-  logo: { fontSize: 48, color: '#6366f1', marginBottom: 12 },
-  appName: { fontSize: 32, fontWeight: '800', color: '#111827' },
-  tagline: { fontSize: 13, color: '#6b7280', marginTop: 6, textAlign: 'center' },
-  card: {
-    width: '100%', maxWidth: 360, backgroundColor: '#fff',
-    borderRadius: 20, padding: 28, alignItems: 'center',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08, shadowRadius: 12, elevation: 4,
+  container: {
+    flex: 1,
+    backgroundColor: '#111111',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
   },
-  cardTitle: { fontSize: 22, fontWeight: '700', color: '#111827', marginBottom: 4 },
-  cardSub: { fontSize: 14, color: '#6b7280', marginBottom: 28 },
+  hero: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  logo: {
+    fontSize: 48,
+    marginBottom: 12,
+  },
+  appName: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#F5F5F5',
+    letterSpacing: -0.3,
+  },
+  tagline: {
+    fontSize: 13,
+    color: '#A0A0A0',
+    marginTop: 8,
+    textAlign: 'center',
+    paddingHorizontal: 20,
+    lineHeight: 18,
+  },
+  card: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: '#1A1A1A',
+    borderRadius: 20,
+    padding: 28,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#2A2A2A',
+  },
+  cardTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#F5F5F5',
+    marginBottom: 4,
+  },
+  cardSub: {
+    fontSize: 14,
+    color: '#A0A0A0',
+    marginBottom: 28,
+  },
+  guestBtn: {
+    backgroundColor: '#84CC16',
+    borderRadius: 10,
+    paddingVertical: 13,
+    paddingHorizontal: 20,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  guestBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#111111',
+  },
   googleBtn: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#fff', borderWidth: 1.5, borderColor: '#d1d5db',
-    borderRadius: 12, paddingVertical: 13, paddingHorizontal: 20,
-    width: '100%', justifyContent: 'center', gap: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#2A2A2A',
+    borderRadius: 10,
+    paddingVertical: 13,
+    paddingHorizontal: 20,
+    width: '100%',
+    justifyContent: 'center',
+    gap: 10,
   },
   gIcon: {
-    width: 22, height: 22, borderRadius: 11,
-    backgroundColor: '#4285F4', alignItems: 'center', justifyContent: 'center',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#4285F4',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  gIconText: { color: '#fff', fontWeight: '800', fontSize: 13 },
-  googleBtnText: { fontSize: 15, fontWeight: '600', color: '#374151' },
-  terms: { fontSize: 11, color: '#9ca3af', textAlign: 'center', marginTop: 20, lineHeight: 16 },
+  gIconText: {
+    color: '#ffffff',
+    fontWeight: '800',
+    fontSize: 12,
+  },
+  googleBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#F5F5F5',
+  },
+  terms: {
+    fontSize: 11,
+    color: '#606060',
+    textAlign: 'center',
+    marginTop: 24,
+    lineHeight: 16,
+  },
 });

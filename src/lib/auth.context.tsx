@@ -23,6 +23,7 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   user: UserSession['user'] | null;
   signIn: () => Promise<void>;
+  signInAsGuest: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -80,6 +81,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await promptAsync();
   }, [promptAsync]);
 
+  const signInAsGuest = useCallback(async () => {
+    const guestSession: UserSession = {
+      accessToken: 'guest_token',
+      idToken: null,
+      refreshToken: null,
+      expiresAt: Date.now() + 365 * 24 * 60 * 60 * 1000,
+      user: {
+        id: 'guest_user',
+        email: 'guest@swingmatch.ai',
+        name: 'Guest Player',
+        picture: '',
+      },
+      scopes: [],
+    };
+    await authService.saveSession(guestSession);
+    setSession(guestSession);
+  }, []);
+
   const signOut = useCallback(async () => {
     await authService.clearSession();
     setSession(null);
@@ -90,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       session, isLoading,
       isAuthenticated: !!session,
       user: session?.user ?? null,
-      signIn, signOut,
+      signIn, signInAsGuest, signOut,
     }}>
       {children}
     </AuthContext.Provider>
